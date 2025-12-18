@@ -1,0 +1,14 @@
+#pragma once
+#include <random>
+
+class Dice {
+  public:
+    Dice( const int min, const int max );
+    Dice() = delete;
+    auto roll() -> int;
+  private:
+    std::random_device r;
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<int> uniform_dist(min, max);
+
+}
