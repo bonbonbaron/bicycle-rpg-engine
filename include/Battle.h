@@ -26,5 +26,6 @@ namespace BG {
       void simulateBadGuyChoices();
       void resetSequence();
       void clean( CharMap& characters );
+      void drawHealthBars( const CharMap& characters ) const;
   };
 }  // namespace BG

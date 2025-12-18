@@ -53,7 +53,9 @@ struct EquipmentSet {
 
 struct BattleStats {
   int hp{};
+  int maxHp{};
   int mp{};
+  int maxMp{};
   int strength{};
   int defense{};
   int speed{};

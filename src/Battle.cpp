@@ -12,7 +12,7 @@
 //  3) colorize (2)
 
 using namespace BG;
-BattleStats gs { 10, 10, 15, 10, 10, EffectType::NORMAL, 1 };
+BattleStats gs { 10, 10, 10, 10, 2, 10, 10, EffectType::NORMAL, 1 };
 
 // This itself is pushed to the stack in my current rendition of main().
 Battle::Battle() : Constellation ( COLS / 2, LINES / 2 ) {
@@ -28,11 +28,8 @@ Battle::Battle() : Constellation ( COLS / 2, LINES / 2 ) {
   auto monster3 = std::make_shared<Character>( "monster bean 3", gs );
 
   // make monsters super weak so they can't kill good guys (yet)
-  monster1->stats.strength = 100;
   monster1->stats.speed = 7;
-  monster2->stats.strength = 100;
   monster2->stats.speed = 9;
-  monster3->stats.strength = 1;
   monster3->stats.speed = 2;
 
   fred->stats.speed = 3;
@@ -82,7 +79,7 @@ void Battle::resetSequence() {
         battleMenuItems.emplace_back( "Fight", [&, this]() { hero->fight( _enemies ); }  );
         battleMenuItems.emplace_back( "Spells", [&, this]() { hero->spell( _heroes, _enemies ); } );
         battleMenuItems.emplace_back( "Items", [&, this]() { hero->item( _heroes, _enemies ); } );
-        _seq.push<Menu>( std::move(battleMenuItems), getX() + hero->x - hero->name.length() / 2, getY() + hero->y + 1, MENU_HEIGHT );
+        _seq.push<Menu>( std::move(battleMenuItems), getX() + hero->x - hero->name.length() / 2, getY() + hero->y + 2, MENU_HEIGHT );
       }
     }
   }
@@ -167,8 +164,45 @@ void Battle::executeActions() {
   }
 }
 
-//void Battle::drawHealthBars() {
-//for ( const auto& e : _enemies ) {
+void Battle::drawHealthBars( const CharMap& characters ) const {
+  int rownum = 2;
+  constexpr int MAX_BAR_LENGTH{10};  // green threshold
+  constexpr int ONE_THIRD_MAX_BAR_LENGTH{ MAX_BAR_LENGTH / 3};  // red threshold
+  constexpr int TWO_THIRDS_BAR_LENGTH{ static_cast<int>(2 * ONE_THIRD_MAX_BAR_LENGTH) }; // yellow threshold
+  constexpr int GREEN{1};
+  constexpr int YELLOW{2};
+  constexpr int RED{3};
+  init_pair( GREEN, COLOR_WHITE, COLOR_GREEN );
+  init_pair( YELLOW, COLOR_WHITE, COLOR_YELLOW );
+  init_pair( RED, COLOR_WHITE, COLOR_RED );
+  for ( const auto& c : characters ) {
+    // Build HP string.
+    long unsigned barLength{ MAX_BAR_LENGTH * c.second->stats.hp / c.second->stats.maxHp };
+    mvprintw( getY() + c.second->y + 1, getX() + c.second->x, "[" );
+    if ( has_colors() && can_change_color() ) {
+      int colorNum{};
+      if ( barLength > TWO_THIRDS_BAR_LENGTH ) {
+        colorNum = GREEN;
+      }
+      else if ( barLength > ONE_THIRD_MAX_BAR_LENGTH ) {
+        colorNum = YELLOW;
+      }
+      else {
+        colorNum = RED;
+      }
+      attron( COLOR_PAIR(colorNum) );
+      printw( "%.*s", barLength, "          " );
+      attroff( COLOR_PAIR(colorNum) );
+      printw( "%.*s", MAX_BAR_LENGTH - barLength, "          " );
+    }
+    else {
+      printw( "%.*s", barLength, "@@@@@@@@@@" );
+      printw( "%.*s", MAX_BAR_LENGTH - barLength, "          " );
+    }
+    printw( "]" );
+    ++rownum;
+  }
+}
 
 
 void Battle::update() {
@@ -196,6 +230,8 @@ void Battle::update() {
       _seq.tick();
     }
     Constellation::update();
+    drawHealthBars( _enemies );
+    drawHealthBars( _heroes );
   }
 }
 
