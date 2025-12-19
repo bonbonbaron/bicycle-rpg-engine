@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cursesw.h>
+#include <bicycle/Constellation.h>
+
+class Battle;
 
 enum class EffectType {
   NORMAL, FIRE, WATER, ICE, DRAGON, LIGHTING, GRASS, ROCK, POISON, SPEED, HOLY, GHOST, PSYCHIC, NONE
@@ -51,11 +54,9 @@ struct EquipmentSet {
   Equipment helmet, armor, legs, shield, weapon;
 };
 
-struct BattleStats {
+struct Stats {
   int hp{};
-  int maxHp{};
   int mp{};
-  int maxMp{};
   int strength{};
   int defense{};
   int speed{};
@@ -63,8 +64,8 @@ struct BattleStats {
   unsigned level{};
 
   // Natural stats + equipment stats
-  auto operator+( const BattleStats& rhs ) -> BattleStats {
-    BattleStats out;
+  auto operator+( const Stats& rhs ) -> Stats {
+    Stats out;
     out.hp = this->hp + rhs.hp;
     out.mp = this->mp + rhs.mp;
     out.strength = this->strength + rhs.strength;
@@ -78,22 +79,23 @@ struct BattleStats {
 struct Character;
 struct Action;
 
-using CharMap = std::map<std::string, std::shared_ptr<struct Character>>;
-
 class Character : public std::enable_shared_from_this<Character> {
   public:
+    Character();
     Character( std::string name,
-        const BattleStats& stats);
+        const Stats& stats,
+        const Stats& maxStats);
     std::string name;
-    int x, y;
-    BattleStats stats{};
+    bool good{};
+    Stats stats{};
+    Stats maxStats{};
     std::shared_ptr<Action> action{};
-    // std::vector<Item> items{};
-    // std::vector<Spell> spells{};
+    std::vector<Item> items{};
+    std::vector<Spell> spells{};
     // Functions
-    void fight( CharMap& enemies );
-    void spell( CharMap& allies, CharMap& enemies );
-    void item( CharMap& allies, CharMap& enemies );
+    void fight( std::shared_ptr<Battle>&& battle );
+    void spell( std::shared_ptr<Battle>&& battle );
+    void item( std::shared_ptr<Battle>&& battle );
 };
 
 

@@ -5,6 +5,6 @@
 using namespace std;
 int main() {
   bicycle::init_ncurses();
-  bicycle::push<BG::Battle>();
+  bicycle::push<Battle>();
   return bicycle::run();
 }

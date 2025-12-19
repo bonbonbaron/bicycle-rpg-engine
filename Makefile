@@ -9,7 +9,7 @@ all: $(BGTGT)
 
 # Temporary
 $(BGTGT): $(BGOBJS) /usr/local/lib/libbicycle.a
-	g++ $(DBG) $(STD) $(BGOBJS) -lbicycle $(shell ncursesw6-config --libs) -lfluidsynth -o $@
+	g++ $(DBG) $(STD) $(BGOBJS) -lbicycle $(shell ncursesw6-config --libs) -lfluidsynth -lyaml-cpp -o $@
 
 $(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp 
 	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@

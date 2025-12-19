@@ -2,144 +2,111 @@
 #include "GameState.h"
 #include <bicycle/bicycle.h>
 #include <bicycle/Menu.h>
-#include <memory>
 #include <algorithm>
 #include "Dice.h"
+
+struct Action;
 
 // GOALS
 //  1) fix turn order
 //  2) show health bars
 //  3) colorize (2)
 
-using namespace BG;
-BattleStats gs { 10, 10, 10, 10, 2, 10, 10, EffectType::NORMAL, 1 };
-
 // This itself is pushed to the stack in my current rendition of main().
-Battle::Battle() : Constellation ( COLS / 2, LINES / 2 ) {
+Battle::Battle() : Constellation<Character> ( COLS / 2, LINES / 2 ) {
+  auto& gs = GameState::getInstance();
+  auto& party = gs.getParty();
+  auto  monsters = gs.getMonsters();
+  int i{};
 
-  // auto& gs = GameState::getInstance();  // TODO not necessary (yet)
-  // TODO replace below; somehow derive the list of enemies based on area or some other game state
-  // error: no matching function for call to ‘construct_at(Character*&, const char [15], int, int, int, BattleStats&, BattleStats&, BattleStats&)’
-  auto fred = std::make_shared<Character>( "Fred", gs );
-  auto ted  = std::make_shared<Character>( "Ted",  gs );
-  auto ed   = std::make_shared<Character>( "Ed",   gs );
-  auto monster1 = std::make_shared<Character>( "monster bean 1", gs );
-  auto monster2 = std::make_shared<Character>( "monster bean 2", gs );
-  auto monster3 = std::make_shared<Character>( "monster bean 3", gs );
+  // Add party to battlefield
+  constexpr int PARTY_ROW{3};
+  for ( auto& p : party ) {
+    auto x = static_cast<int>( i++ * getWidth() / (party.size() + 1) - p->name.length()/2 );
+    auto y = static_cast<int>( PARTY_ROW*getHeight()/4 );
+  }
 
-  // make monsters super weak so they can't kill good guys (yet)
-  monster1->stats.speed = 7;
-  monster2->stats.speed = 9;
-  monster3->stats.speed = 2;
+  // Add monsters to battlefield
+  constexpr int MONSTER_ROW{3};
+  for ( auto& m : monsters ) {
+    auto x = static_cast<int>( i++ * getWidth() / (party.size() + 1) - m.name.length()/2 );
+    auto y = static_cast<int>( MONSTER_ROW*getHeight()/4 );
+  }
 
-  fred->stats.speed = 3;
-  ted->stats.speed = 8;
-  ed->stats.speed = 10;
+  // Parse the map for good guys and bad guys to make selections easier.
+  _heroes = filter( []( CharPoint& c ) { return c.good; } );
+  _enemies = filter( []( CharPoint& c ) { return !c.good; } );
 
-  _heroes[ fred->name ] = fred;
-  _heroes[ ted->name ] = ted;
-  _heroes[ ed->name ] = ed;
-  _enemies[ monster1->name ] = monster1;
-  _enemies[ monster2->name ] = monster2;
-  _enemies[ monster3->name ] = monster3;
-
-  positionCharacters( _enemies, 1, RED );
-  positionCharacters( _heroes, 3, GREEN );
-  // stay dumb for now Michael... stay dumb for the proof of concept
   resetSequence();
 }
-
-void Battle::positionCharacters( CharMap& chars, const int heightRatio, const Color color ) {
-  int i = 1;
-  for ( const auto& c: chars ) {
-    // Centers hero if size is 1.
-    auto name = c.second->name;
-    auto x = static_cast<int>( i++ * getWidth() / (chars.size() + 1) - name.length()/2 );
-    auto y = static_cast<int>( heightRatio*getHeight()/4 );
-    setPoint( name, { color, x, y, name } );
-    c.second->x = x;
-    c.second->y = y;
-  }
-}
-
 
 // Can I insert the character by having them fight inside the lambda?
 void Battle::resetSequence() {
   constexpr int MENU_HEIGHT{ 5 };
   // This is a bit awkward as constellation and actual character data live separately.
-  const auto& points = getPoints();
-  for ( auto& [ k, hero ] : _heroes ) {
+  auto& points = getPoints();
+  for ( auto p : points ) {
     // Only give this hero a turn if he's still alive. 
-    if ( hero->stats.hp > 0 ) {
-      // Get *living* hero's position in the constellation.
-      auto p = points.find( k );
-      if ( p != points.end() ) {
-        // Make a battle menu beneath this character's symbol.
-        std::vector<MenuItem> battleMenuItems{};
-        battleMenuItems.emplace_back( "Fight", [&, this]() { hero->fight( _enemies ); }  );
-        battleMenuItems.emplace_back( "Spells", [&, this]() { hero->spell( _heroes, _enemies ); } );
-        battleMenuItems.emplace_back( "Items", [&, this]() { hero->item( _heroes, _enemies ); } );
-        _seq.push<Menu>( std::move(battleMenuItems), getX() + hero->x - hero->name.length() / 2, getY() + hero->y + 2, MENU_HEIGHT );
-      }
+    if ( p.second.stats.hp > 0 ) {
+      // Make a battle menu beneath this character's symbol.
+      std::vector<MenuItem> battleMenuItems{};
+      battleMenuItems.emplace_back( "Fight", [&]() { p.second.fight( shared_from_this() ); }  );
+      battleMenuItems.emplace_back( "Spells", [&]() { p.second.spell( shared_from_this() ); } );
+      battleMenuItems.emplace_back( "Items", [&]() { p.second.item( shared_from_this() ); } );
+      _seq.push<Menu>( std::move(battleMenuItems), getX() + p.second.x - p.second.name.length() / 2, getY() + p.second.y + 2, MENU_HEIGHT );
     }
   }
 }
 
-void Battle::clean( CharMap& characters ) {
+void Battle::clean() {
   std::vector<std::string> keysToRemove{};
   // Remove dead characters from constellation
-  for ( const auto& c : characters ) {
-    if ( c.second->stats.hp <= 0 ) {
-      removePoint( c.first );
-      // Defer removal from the map we're iterating over.
-      keysToRemove.push_back( c.first );
-    }
-  }
-
-  // Remove character from character map.
-  for ( const auto& key : keysToRemove ) {
-    auto it = characters.find( key );
-    if ( it != characters.end() ) {
-      characters.erase( it );
-    }
-    if ( characters.size() ) {
-      int i = 0;
+  auto points = getPoints();
+  for ( auto it = points.begin(); it != points.end(); ++it ) {
+    if ( it->second.stats.hp <= 0 ) {
+      if ( it->second.good ) {
+        auto it2 = _heroes.find( it->first );
+        if ( it2 != _heroes.end() ) {
+          _heroes.erase( it2 );
+        }
+      }
+      else {
+        auto it2 = _enemies.find( it->first );
+        if ( it2 != _enemies.end() ) {
+          _enemies.erase( it2 );
+        }
+      }
+      it = points.erase( it );
     }
   }
 }
 
-void Battle::simulateBadGuyChoices() {
-  Dice dice{ 0, static_cast<int>( _heroes.size() ) - 1 };
-  const auto firstHeroIt = _heroes.begin();
 
-  for ( auto& e : _enemies ) {
-    auto tgtHeroIt = firstHeroIt;
+
+void Battle::simulateBadGuyChoices() {
+  Dice dice{ 0, static_cast<int>(_heroes.size()) - 1 };
+  for (auto& e : _enemies ) {
     auto effect = std::make_shared<Effect>( 
         "fight", 
-        -e.second->stats.strength, 
+        -e.second.stats.strength, 
         TargetAttribute::HP, 
-        e.second->stats.type );
+        e.second.stats.type );
 
-    // Maybe there's a better way to do this, but map iterators don't let you add an integer to an iterator.
-    for ( int idx = 0, tgtIdx = dice.roll(); idx < tgtIdx; ++idx, ++tgtHeroIt );
+    auto h = _heroes.begin();
+    std::advance( h, dice.roll() );
 
-    e.second->action = std::make_shared<Action>( 
-        e.second,
-        tgtHeroIt->second,
+    e.second.action = std::make_shared<Action>( 
+        e.second.shared_from_this(),
+        std::static_pointer_cast<Character>( h->second.shared_from_this() ),
+        //it.shared_from_this(),
         effect );  // Mark this character's chosen action.
   }
 }
 
 void Battle::aggregateActions() {
-  for ( auto& h : _heroes ) {
-    if ( h.second->action != nullptr ) {
-      _actionSequence.emplace_back( *h.second->action );
-    }
-  }
-
-  for ( auto& e : _enemies ) {
-    if ( e.second->action != nullptr ) {
-      _actionSequence.emplace_back( *e.second->action );
+  for ( const auto& p : getPoints() ) {
+    if ( p.second.action != nullptr ) {
+      _actionSequence.emplace_back( *p.second.action );
     }
   }
 }
@@ -164,7 +131,7 @@ void Battle::executeActions() {
   }
 }
 
-void Battle::drawHealthBars( const CharMap& characters ) const {
+void Battle::drawHealthBars() const {
   int rownum = 2;
   constexpr int MAX_BAR_LENGTH{10};  // green threshold
   constexpr int ONE_THIRD_MAX_BAR_LENGTH{ MAX_BAR_LENGTH / 3};  // red threshold
@@ -175,10 +142,10 @@ void Battle::drawHealthBars( const CharMap& characters ) const {
   init_pair( GREEN, COLOR_WHITE, COLOR_GREEN );
   init_pair( YELLOW, COLOR_WHITE, COLOR_YELLOW );
   init_pair( RED, COLOR_WHITE, COLOR_RED );
-  for ( const auto& c : characters ) {
+  for ( const auto& c : getPoints() ) {
     // Build HP string.
-    long unsigned barLength{ MAX_BAR_LENGTH * c.second->stats.hp / c.second->stats.maxHp };
-    mvprintw( getY() + c.second->y + 1, getX() + c.second->x, "[" );
+    long unsigned barLength{ static_cast<long unsigned>( MAX_BAR_LENGTH * c.second.stats.hp / c.second.maxStats.hp ) };
+    mvprintw( getY() + c.second.y + 1, getX() + c.second.x, "[" );
     if ( has_colors() && can_change_color() ) {
       int colorNum{};
       if ( barLength > TWO_THIRDS_BAR_LENGTH ) {
@@ -206,9 +173,9 @@ void Battle::drawHealthBars( const CharMap& characters ) const {
 
 
 void Battle::update() {
-  if ( _enemies.size() == 0 || _heroes.size() == 0 ) {
+  if ( _heroes.size() == 0 || _enemies.size() == 0) {
     bicycle::pop();  // Pop the battle menu.
-    bicycle::pop();  // Pop the battle window.
+    bicycle::pop();  // Pop the battle window.  (TODO if you automate someone, this window won't exist. Careful!) 
   }
   else {
     if ( _seq.isComplete() ) {
@@ -218,20 +185,20 @@ void Battle::update() {
       sortActions();
       executeActions();
       _actionSequence.clear();
-      clean( _enemies );  // blows away enemies from constellation AND map
-      clean( _heroes );   // blows away heroes  from constellation AND map
-                          // Don't revive heroes' battle menus if the battle's over.
-      if ( _enemies.size() > 0 && _heroes.size() > 0 ) {
+      clean();  
+      // Don't revive heroes' battle menus if the battle's over.
+      if (  _heroes.size() > 0 && _enemies.size() > 0 ) {
         resetSequence();
       }
     }
     // Don't act on menus if they don't exist.
-    if ( _enemies.size() > 0 && _heroes.size() > 0 ) {
-      _seq.tick();
+    if ( _heroes.size() > 0 && _enemies.size() > 0 ) {
+      if ( ! isSelecting() ) {
+        _seq.tick();
+      }
     }
     Constellation::update();
-    drawHealthBars( _enemies );
-    drawHealthBars( _heroes );
+    drawHealthBars();
   }
 }
 

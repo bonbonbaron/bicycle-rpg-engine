@@ -1,31 +1,30 @@
 #pragma once
 #include <bicycle/Constellation.h>
 #include <bicycle/Sequence.h>
+#include <memory>
+#include <map>
 #include "Character.h"
+#include <vector>
 
-namespace BG {
-  // Let's just see how a battle would look before we worry about the design overly much.
+using CharPoint = Point<Character>;
 
-  class Battle : public Constellation {
-    public:
-      Battle();
-      void update() override;
-      void react( const int i ) override;
-    private:
-      // private member variables
-      CharMap _heroes{};
-      CharMap _enemies{};
-      int _turnNum{};
-      Sequence _seq{};
-      std::vector<Action> _actionSequence{};
-      // private member functions
-      void positionCharacters( CharMap& chars, const int heightRatio, const Color color );
-      void aggregateActions();
-      void sortActions();
-      void executeActions();
-      void simulateBadGuyChoices();
-      void resetSequence();
-      void clean( CharMap& characters );
-      void drawHealthBars( const CharMap& characters ) const;
-  };
-}  // namespace BG
+class Battle : public std::enable_shared_from_this<Battle>, public Constellation<Character> {
+  public:
+    Battle();
+    void update() override;
+    void react( const int i ) override;
+  private:
+    // private member variables
+    Sequence _seq{};
+    std::vector<Action> _actionSequence{};
+    // private member functions
+    void aggregateActions();
+    void sortActions();
+    void executeActions();
+    void simulateBadGuyChoices();
+    void resetSequence();
+    void clean();
+    void drawHealthBars() const;
+    PointMap<Character> _heroes{};
+    PointMap<Character> _enemies{};
+};
