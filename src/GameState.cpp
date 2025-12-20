@@ -21,3 +21,5 @@ void GameState::configure() {
   YAML::Node cfg = YAML::LoadFile( "./config/dummy.yml" ); // TODO make generalizable
   std::cout << cfg["title"];
 }
+
+

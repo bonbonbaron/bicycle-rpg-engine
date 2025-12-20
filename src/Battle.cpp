@@ -62,6 +62,7 @@ void Battle::clean() {
   std::vector<std::string> keysToRemove{};
   // Remove dead characters from constellation
   auto points = getPoints();
+  // TODO might be cleaner to use filter() here.
   for ( auto it = points.begin(); it != points.end(); ++it ) {
     if ( it->second.stats.hp <= 0 ) {
       if ( it->second.good ) {

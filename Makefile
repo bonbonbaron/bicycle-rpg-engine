@@ -2,7 +2,9 @@ DBG=-g
 STD=-std=c++20
 
 BGREPO := $(shell git rev-parse --show-toplevel)
-BGSRCS := main GameState Battle Character Dice
+
+BGSRCS := main GameState Config Battle Character Dice
+
 BGOBJS := $(BGSRCS:%=$(BGREPO)/build/%.o)
 BGTGT=$(BGREPO)/o
 all: $(BGTGT)
@@ -11,7 +13,7 @@ all: $(BGTGT)
 $(BGTGT): $(BGOBJS) /usr/local/lib/libbicycle.a
 	g++ $(DBG) $(STD) $(BGOBJS) -lbicycle $(shell ncursesw6-config --libs) -lfluidsynth -lyaml-cpp -o $@
 
-$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp 
+$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp $(BGREPO)/include/%.h
 	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@
 
 $(BGREPO)/build/:
