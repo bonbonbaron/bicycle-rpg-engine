@@ -7,11 +7,6 @@
 
 struct Action;
 
-// GOALS
-//  1) fix turn order
-//  2) show health bars
-//  3) colorize (2)
-
 // This itself is pushed to the stack in my current rendition of main().
 Battle::Battle() : Constellation<Character> ( COLS / 2, LINES / 2 ) {
   auto& gs = GameState::getInstance();

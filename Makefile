@@ -16,6 +16,9 @@ $(BGTGT): $(BGOBJS) /usr/local/lib/libbicycle.a
 $(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp $(BGREPO)/include/%.h
 	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@
 
+$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp   # for when there's no matching header
+	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@
+
 $(BGREPO)/build/:
 	mkdir -p build
 
