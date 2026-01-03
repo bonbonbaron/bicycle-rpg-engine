@@ -3,7 +3,7 @@ STD=-std=c++20
 
 BGREPO := $(shell git rev-parse --show-toplevel)
 
-BGSRCS := main GameState Config Battle Character Dice
+BGSRCS := main GameState Battle Character Dice
 
 BGOBJS := $(BGSRCS:%=$(BGREPO)/build/%.o)
 BGTGT=$(BGREPO)/o
