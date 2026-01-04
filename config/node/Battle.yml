@@ -1,0 +1,26 @@
+node:
+  name: Battle
+  description: "The battle node"
+  events:
+    - play: "battlemusic.mid"
+    - showgrid:
+        todo: idk
+    - loop:
+      - fallback:
+        - foreach:
+            in: goodGuys
+            if:
+              func: isAlive
+              then:
+                showmenu: 
+                  name: "BattleMenu.yml"
+                  pos: anchored
+                  dims:
+                    w: 50
+                    h: 20
+                  preconditions:
+                    - bitIsSet:
+                        name: someBitset
+                        idx: 5
+              
+
