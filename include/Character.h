@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cursesw.h>
+#include <set>
 
 class Battle;
 
@@ -15,7 +16,7 @@ enum class EffectType {
 
 static const std::map< EffectType, EffectType > weaknesses {
   // Lefthand is weak against righthand side.
-    { EffectType::NORMAL,   EffectType::NONE },
+  { EffectType::NORMAL,   EffectType::NONE },
     { EffectType::FIRE,     EffectType::WATER },
     { EffectType::WATER,    EffectType::GRASS },
     { EffectType::ICE,      EffectType::FIRE },
@@ -28,43 +29,20 @@ enum class TargetAttribute {
   HP, MP, STRENGTH, DEFENSE, SPEED, TYPE
 };
 
-struct Effect {
-  std::string name;  // TODO is this needed?
-  int amount{};    // generic enough to affect any stat positively or negatively
-  TargetAttribute tgtAttr{};  // defaults to HP
-  EffectType type{};  // defaults to normal
-};
-
-struct Spell : Effect {
-  unsigned cost;
-};
-
-struct Item : Effect {
-  unsigned qty;
-};
-
-enum class EquipType { HELMET, BODY, LEGS, SHIELD, WEAPON };
-
-struct Equipment : Effect {
-  EquipType type;
-};
-
-struct EquipmentSet {
-  Equipment helmet, armor, legs, shield, weapon;
-};
-
-struct Stats {
+struct Agent {
+  std::string name;
+  std::string desc;
   int hp{};
   int mp{};
   int strength{};
   int defense{};
   int speed{};
   EffectType type{};
-  unsigned level{};
 
   // Natural stats + equipment stats
-  auto operator+( const Stats& rhs ) -> Stats {
-    Stats out;
+  // "+" omits multipliers because its context is equipping
+  auto operator+( const Agent& rhs ) -> Agent {
+    Agent out;
     out.hp = this->hp + rhs.hp;
     out.mp = this->mp + rhs.mp;
     out.strength = this->strength + rhs.strength;
@@ -73,24 +51,74 @@ struct Stats {
     out.type = rhs.type;  // Equipment type strength overrides natural type strength.
     return out;
   }
+
+  // "+=" omits changing type because its context is fighting
+  auto operator+=( const Agent& rhs ) -> Agent {
+    Agent out;
+    int multiplier{1};
+    if ( this->type == weaknesses[rhs.type] ) {
+      multiplier *= 2;
+    }
+    else if ( this->type == rhs.type || ( rhs.type == EffectType::HOLY ) ) {
+      multiplier *= -1;
+    }
+    hp = this->hp             + ( rhs.hp * multiplier );
+    mp = this->mp             + ( rhs.mp * multiplier );
+    strength = this->strength + ( rhs.strength * multiplier );
+    defense = this->defense   + ( rhs.defense * multiplier );
+    speed = this->speed       + ( rhs.speed * multiplier );
+  }
+};
+
+struct Commodity : Agent {  // Magic is a commodity if you count MP as a currency.
+  unsigned cost;
+};
+
+struct Spell : Commodity {
+  unsigned successProbability;
+};
+
+struct Item : Commodity {
+  unsigned qty;
+  const unsigned vol;
+  const unsigned mass;  // affects character's speed
+};
+
+enum class EquipType { HELMET, BODY, LEGS, SHIELD, WEAPON };
+
+struct Equipment : Agent {
+  const EquipType type;
+};
+
+struct EquipmentSet {
+  Equipment helmet, armor, legs, shield, weapon;
+};
+
+struct Stats {
+  unsigned level{};
+  Agent base;
 };
 
 struct Character;
 struct Action;
 
-class Character : public std::enable_shared_from_this<Character> {
+struct Bag {
+  unsigned volCapacity{};
+  unsigned massCapacity{};
+  std::vector<Item> items{};
+};
+
+class Character : public std::enable_shared_from_this<Character>, Agent {
   public:
     Character();
-    Character( std::string name,
-        const Stats& stats,
-        const Stats& maxStats);
+    Character( const Agent& stats );
     std::string name;
     bool good{};
-    Stats stats{};
-    Stats maxStats{};
+    Bag bag{};
+    // TODO equipment
     std::shared_ptr<Action> action{};
     std::vector<Item> items{};
-    std::vector<Spell> spells{};
+    std::set<Spell> spells{};
     // Functions
     void fight( std::shared_ptr<Battle>&& battle );
     void spell( std::shared_ptr<Battle>&& battle );
@@ -101,7 +129,7 @@ class Character : public std::enable_shared_from_this<Character> {
 struct Action {
   std::shared_ptr<Character> src;
   std::shared_ptr<Character> dst;
-  std::shared_ptr<Effect> effect;
+  std::shared_ptr<Agent> effect;
 
   bool operator<( const Action& rhs ) const {
     return src->stats.speed > rhs.src->stats.speed;  // ">" sorts in descending order
@@ -114,32 +142,7 @@ struct Action {
   }
 
   void execute() {
-    assert( effect != nullptr );
-    switch ( effect->tgtAttr ) {
-      case TargetAttribute::HP: 
-        dst->stats.hp += effect->amount;
-        dst->stats.hp = std::max<int>( dst->stats.hp, 0 );
-        break;
-      case TargetAttribute::MP: 
-        dst->stats.mp += dst->stats.mp, effect->amount;
-        dst->stats.mp = std::max<int>( dst->stats.mp, 0 );
-        break;
-      case TargetAttribute::STRENGTH: 
-        dst->stats.strength += dst->stats.strength, effect->amount;
-        dst->stats.strength = std::max<int>( dst->stats.strength, 0 );
-        break;
-      case TargetAttribute::DEFENSE: 
-        dst->stats.defense += dst->stats.defense, effect->amount;
-        dst->stats.defense = std::max<int>( dst->stats.defense, 0 );
-        break;
-      case TargetAttribute::SPEED: 
-        dst->stats.speed += dst->stats.speed, effect->amount;
-        dst->stats.speed = std::max<int>( dst->stats.speed, 0 );
-        break;
-      case TargetAttribute::TYPE:
-        dst->stats.type = effect->type;
-        break;
-    }
+    dst->stats += effect;
   };
 };
 

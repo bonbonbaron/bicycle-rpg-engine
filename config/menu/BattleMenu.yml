@@ -10,7 +10,9 @@ menu:
         onSelect:
           func:
             name: fight
-            args: {src: this, dst: selection}
+            args: 
+              - src: this
+              - dst: selection
       relpos:
         x: 1
         y: 1

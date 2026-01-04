@@ -1,0 +1,9 @@
+ I need to clear my head and clarify my goals, even though I likely won't touch this again until next weekend (which saddens me a bit):
+
+  Prove you can bring up a node with a dialogue and a song.
+  Prove you can traverse to another node with a menu.
+  Prove you can select from that menu.
+  Prove that the action from selecting the item has its effect.
+  Prove that you can do a sequence of events.
+  Prove that you can do a sequence of menus acting on a specified map.
+  

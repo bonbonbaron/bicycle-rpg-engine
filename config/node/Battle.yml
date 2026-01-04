@@ -6,21 +6,20 @@ node:
     - showgrid:
         todo: idk
     - loop:
-      - fallback:
-        - foreach:
-            in: goodGuys
-            if:
-              func: isAlive
-              then:
-                showmenu: 
-                  name: "BattleMenu.yml"
-                  pos: anchored
-                  dims:
-                    w: 50
-                    h: 20
-                  preconditions:
-                    - bitIsSet:
-                        name: someBitset
-                        idx: 5
-              
+        if: battleIsStillRaging
+        then:
+          - fallback:
+            - foreach:  # std::for_each
+                of: goodGuys
+                  showmenu: 
+                    name: "BattleMenu.yml"
+                    pos: anchored
+                    dims:
+                      w: 50
+                      h: 20
+                    preconditions:
+                      func: 
+                        name: isAlive
+                        args: this
+                
 
