@@ -1,18 +1,19 @@
 node:
   name: Battle
-  description: "The universal basic battle node"
+  description: "The battle node"
   events:
     - fallback:
       - foreach:
-          ofThe: goodGuys
-          showMenu: 
+          in: goodGuys
+          showmenu: 
             name: "BattleMenu.yml"
-            pos:
-              x: 20
-              y: 10
+            pos: anchored
+            dims:
+              w: 50
+              h: 20
             preconditions:
-              bitIsSet:
-                number: 5
-                bitset: someBitSet
+              - bitIsSet:
+                  name: someBitset
+                  idx: 5
             
 

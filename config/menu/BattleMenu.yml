@@ -3,13 +3,42 @@ menu:
   description: "Menu for each character to choose a battle action"
   items:
     - name: "Fight"
-      func: fight
-      args: {currFighter: this, enemies: enemies}
+      showmenu: 
+        fromfunc:
+          name: getEnemies
+          args: this
+        onSelect:
+          func:
+            name: fight
+            args: {src: this, dst: selection}
+      relpos:
+        x: 1
+        y: 1
+      dims:
+        w: 20
+        h: 7
     - name: "Magic"
-      func: cast
-      args: {currFighter: this}
+      showmenu:
+        fromfunc:
+          name: getSpells
+          args: this
+        onSelect:
+          showmenu:
+            info: name
+            from: enemies
+      relpos:
+        x: 1
+        y: 1
+      dims:
+        w: 20
+        h: 7
     - name: "Items"
-      func: use
-      args: {currFighter: this}
+      show: items
+      relpos:
+        x: 1
+        y: 1
+      dims:
+        w: 20
+        h: 7
 
       
