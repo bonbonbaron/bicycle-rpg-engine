@@ -4,6 +4,8 @@
 #include <bicycle/Menu.h>
 #include "Battle.h"
 
+// I think all of this is about to go away.
+
 Character::Character() {}
 
 Character::Character( std::string name,

@@ -8,5 +8,6 @@ int main() {
   // bicycle::init_ncurses();
   // bicycle::push<Battle>();
   // return bicycle::run();
+  Config cfg;
   return 0;
 }

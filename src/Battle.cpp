@@ -127,6 +127,7 @@ void Battle::executeActions() {
   }
 }
 
+// This ought to be abstracted away as a general progress bar widget.
 void Battle::drawHealthBars() const {
   int rownum = 2;
   constexpr int MAX_BAR_LENGTH{10};  // green threshold

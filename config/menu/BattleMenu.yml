@@ -1,0 +1,15 @@
+menu:
+  name: "Battle Menu"
+  description: "Menu for each character to choose a battle action"
+  items:
+    - name: "Fight"
+      func: fight
+      args: {currFighter: this, enemies: enemies}
+    - name: "Magic"
+      func: cast
+      args: {currFighter: this}
+    - name: "Items"
+      func: use
+      args: {currFighter: this}
+
+      

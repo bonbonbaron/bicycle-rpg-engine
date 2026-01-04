@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cursesw.h>
-#include <bicycle/Constellation.h>
 
 class Battle;
 

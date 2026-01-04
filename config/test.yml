@@ -1,7 +1,18 @@
-there: 5
-a:
-  b: 5
-  c:
-    - 1
-    - 2
-    - 3
+node:
+  name: Battle
+  description: "The universal basic battle node"
+  events:
+    - fallback:
+      - foreach:
+          ofThe: goodGuys
+          showMenu: 
+            name: "BattleMenu.yml"
+            pos:
+              x: 20
+              y: 10
+            preconditions:
+              bitIsSet:
+                number: 5
+                bitset: someBitSet
+            
+
