@@ -4,6 +4,7 @@
   Prove you can traverse to another node with a menu.
   Prove you can select from that menu.
   Prove that the action from selecting the item has its effect.
+  Prove that actions can iterate over a collection.
   Prove that you can do a sequence of events.
   Prove that you can do a sequence of menus acting on a specified map.
   

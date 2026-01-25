@@ -1,5 +1,4 @@
 #pragma once
-#include <bicycle/Constellation.h>
 #include <bicycle/Sequence.h>
 #include <memory>
 #include <map>
@@ -8,7 +7,7 @@
 
 using CharPoint = Point<Character>;
 
-class Battle : public std::enable_shared_from_this<Battle>, public Constellation<Character> {
+class Battle : public std::enable_shared_from_this<Battle> {
   public:
     Battle();
     void update() override;

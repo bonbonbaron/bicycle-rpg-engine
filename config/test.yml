@@ -1,0 +1,12 @@
+Trigger1:
+  tree: test-tree
+  priority: 5
+Trigger2:
+  tree: tt2
+  priority: 7
+  freq: 500
+Trigger3:
+  tree: test-tree
+  priority: 8
+  freq: 200
+

@@ -3,7 +3,7 @@ STD=-std=c++20
 
 BGREPO := $(shell git rev-parse --show-toplevel)
 
-BGSRCS := main GameState Battle Character Dice
+BGSRCS := main 
 
 BGOBJS := $(BGSRCS:%=$(BGREPO)/build/%.o)
 BGTGT=$(BGREPO)/o
@@ -13,10 +13,10 @@ all: $(BGTGT)
 $(BGTGT): $(BGOBJS) /usr/local/lib/libbicycle.a
 	g++ $(DBG) $(STD) $(BGOBJS) -lbicycle $(shell ncursesw6-config --libs) -lfluidsynth -lyaml-cpp -o $@
 
-$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp $(BGREPO)/include/%.h
+$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp $(BGREPO)/include/%.h 
 	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@
 
-$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp   # for when there's no matching header
+$(BGREPO)/build/%.o: $(BGREPO)/src/%.cpp /usr/local/include/bicycle/Personality.h  # for when there's no matching header
 	g++ $(DBG) $(STD) -c $< -Iinclude $(shell ncursesw6-config --cflags ) -o $@
 
 $(BGREPO)/build/:
