@@ -1,7 +1,9 @@
 #include <iostream>
-#include <bicycle/Personality.h>
+#include <bicycle/Graph.h>
+#include <bicycle/ConditionRegistry.h>
 #include <string_view>
 #include <memory>
+
 using namespace std;
 using enum ActionState;
 
@@ -17,7 +19,6 @@ F_( sayHo, std::cout << "tree2: Ho there!\n"; return FAILED; );
 F_( sayHe, std::cout << "tree2: He there!\n"; return SUCCESS; );
 F_( chooseTgt, 
     std::cout << "both trees: Thinking...\n"; 
-  std::this_thread::sleep_for( std::chrono::milliseconds( 2000 ) );
     std::cout << " both trees: Choosing my target\n"; 
     return FAILED; );
 F_( eatTgt, std::cout << "both trees: Eating my target\n"; return SUCCESS; );
@@ -39,16 +40,24 @@ static void registerActions() {
   ACT( eatTgt );
 }
 
+static auto imnotgay ()-> bool {
+ cout << "I SWEAR TO GAWD\n"; 
+ return true; 
+}
+
+// TODO automate this, perhaps replacing F_ macro with template
+static void registerConditions() {
+  COND( imnotgay );
+}
+
 // Now to figure out how to get references to talk directly through.
 int main() {
   registerPortTypes();
   registerActions();
-  std::string_view fp{ "./config/test.yml" };
+  registerConditions();
+  std::string_view fp{ "./config/node/n1.yml" };
   auto root = YAML::LoadFile( fp.data() );
-  Personality p1 = root.as<Personality>();
-  Personality p2 = root.as<Personality>();
-  p1.trigger("Trigger2");
-  p2.trigger("Trigger3");
-  std::this_thread::sleep_for( std::chrono::milliseconds( 3000 ) );
+  auto n = root.as<bicycle::Node>();
+  n.run();
   return 0;
 }

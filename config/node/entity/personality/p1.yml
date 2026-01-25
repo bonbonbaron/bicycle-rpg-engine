@@ -1,7 +1,7 @@
 Trigger1:
   tree: test-tree
   priority: 5
-Trigger2:
+onStart:
   tree: tt2
   priority: 7
   freq: 500
