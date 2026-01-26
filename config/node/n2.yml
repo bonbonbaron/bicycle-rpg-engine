@@ -1,4 +1,4 @@
-name: "node #1"
+name: "node #2"
 desc: "because i saID SO"
 event: idk
 edges:
@@ -7,7 +7,7 @@ edges:
     endpointFilename: michaelnotbeinggay
     condition: imnotgay
   "Closet door":
-    endpointFilename: n2
+    endpointFilename: michaelnotbeinggay
 entities:
   michael: [1, 2]
   goomba:
