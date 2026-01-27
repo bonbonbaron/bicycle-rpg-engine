@@ -3,6 +3,6 @@
 
 int main() {
   bicycle::init();
-  bicycle::push<Grid>( 1,2, 30, 14 );
+  bicycle::push<Grid>( "g1" );
   return bicycle::run();
 }
