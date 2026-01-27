@@ -3,3 +3,8 @@ y: 10
 w: 25
 h: 10
 bg: bg1
+fg:
+  michael: [2, 2]
+  goomba:
+    - [ 3, 3 ]
+    - [ 1, 10 ]
