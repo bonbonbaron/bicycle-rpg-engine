@@ -3,6 +3,7 @@ y: 10
 w: 25
 h: 10
 bg: bg1
+focus: michael
 fg:
   michael: [2, 2]
   goomba:

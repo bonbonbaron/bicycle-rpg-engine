@@ -1,6 +1,9 @@
 #include <iostream>
 #include <bicycle/ConditionRegistry.h>
 #include <bicycle/Personality.h>
+#include <bicycle/Dialogue.h>
+#include <bicycle/bicycle.h>
+#include <bicycle/Body.h>
 
 #include "Config.h"
 
@@ -21,6 +24,29 @@ F_( chooseTgt,
     std::cout << " both trees: Choosing my target\n"; 
     return FAILED; );
 F_( eatTgt, std::cout << "both trees: Eating my target\n"; return SUCCESS; );
+F_( onInput,
+    auto& input = arg.get<char>("input");
+    auto& posPtr = arg.get<std::shared_ptr<Position>>("pos");
+    switch( input ) {
+      case 'h':
+      case 'H':
+        --posPtr->x;
+      break;
+      case 'j':
+      case 'J':
+        ++posPtr->y;
+      break;
+      case 'k':
+      case 'K':
+        --posPtr->y;
+      break;
+      case 'l':
+      case 'L':
+        ++posPtr->x;
+      break;
+    }
+    return SUCCESS;
+  );
 
 static void registerPortTypes() {
   PORT( age, int );
@@ -28,6 +54,9 @@ static void registerPortTypes() {
   PORT( hello, int );
   PORT( there, int );
   PORT( time, int );
+  PORT( name, std::string );
+  PORT( input, char );
+  PORT( pos, std::shared_ptr<Position> );
 }
 
 // TODO automate this, perhaps replacing F_ macro with template
@@ -37,6 +66,7 @@ static void registerActions() {
   ACT( sayHe );
   ACT( chooseTgt );
   ACT( eatTgt );
+  ACT( onInput, "pos", "input" );
 }
 
 auto imnotgay ()-> bool {
@@ -55,7 +85,10 @@ static void registerBlackboards() {
       { "hi", Stats{ 59, 123, "Charlie" } },
       { "hello", 8012 },
       { "there", 800 },
-      { "time", 0 }
+      { "time", 0 },
+      { "name", std::string{"Michael"} },
+      { "input", ' ' },
+      { "pos", std::shared_ptr<Position>() }
      );
 }
 

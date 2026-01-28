@@ -5,8 +5,13 @@ onStart:
   tree: tt2
   priority: 7
   freq: 500
+onSelect:
+  tree: test-tree
+  priority: 12
 Trigger3:
   tree: test-tree
   priority: 8
   freq: 200
-
+onInput:
+  tree: onInput
+  priority: 100
