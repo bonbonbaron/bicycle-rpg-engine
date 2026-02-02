@@ -4,6 +4,12 @@
 #include <bicycle/Dialogue.h>
 #include <bicycle/bicycle.h>
 #include <bicycle/Body.h>
+#include <bicycle/Dice.h>
+#include <bicycle/Timer.h>
+#include <chrono>
+#include <thread>
+
+#include <cursesw.h>
 
 #include "Config.h"
 
@@ -15,15 +21,50 @@ struct Stats {
   std::string buddy;
 };
 
-F_( sayHi, std::cout << "tree1: Hi there!\n"; return SUCCESS; );
+F_( plan,
+  Dice dirDice{ 0, 3 };
+  Position delta{};
+  switch ( dirDice.roll() ) {
+    case 0:
+      delta.x = 1;
+      break;
+    case 1:
+      delta.x = -1;
+      break;
+    case 2:
+      delta.y = 1;
+      break;
+    default:
+      delta.y = -1;
+      break;
+  }
+  arg.set<Position>( "vel", delta );
+
+  Dice sleepDice{ 100, 1000 };
+  std::this_thread::sleep_for( std::chrono::milliseconds( sleepDice.roll() ) );
+
+  return IN_PROGRESS;
+);
+
+// F_( mv,
+ActionState mv( ActArg& arg ) {
+  auto& pos = arg.get<std::shared_ptr<Position>>( "pos" );
+  auto& vel = arg.get<Position>( "vel" );
+  *pos += vel;
+  auto& wm = WindowManager::getInstance();
+  mvprintw( COLS - 1, 1, "moved to (%d, %d)", pos->y, pos->x );
+  wm.render();
+  return IN_PROGRESS;
+}
+
+F_( sayHi, std::cout << "tree1: Hi there!\n"; return COMPLETE; );
 F_( sayHo, std::cout << "tree2: Ho there!\n"; return FAILED; );
-//F_( sayHe, std::cout << "He there!\n"; arg.get<int>("hello") = 45; return SUCCESS; );
-F_( sayHe, std::cout << "tree2: He there!\n"; return SUCCESS; );
+F_( sayHe, std::cout << "tree2: He there!\n"; return COMPLETE; );
 F_( chooseTgt, 
     std::cout << "both trees: Thinking...\n"; 
     std::cout << " both trees: Choosing my target\n"; 
     return FAILED; );
-F_( eatTgt, std::cout << "both trees: Eating my target\n"; return SUCCESS; );
+F_( eatTgt, std::cout << "both trees: Eating my target\n"; return COMPLETE; );
 F_( onInput,
     auto& input = arg.get<char>("input");
     auto& posPtr = arg.get<std::shared_ptr<Position>>("pos");
@@ -45,7 +86,7 @@ F_( onInput,
         ++posPtr->x;
       break;
     }
-    return SUCCESS;
+    return COMPLETE;
   );
 
 static void registerPortTypes() {
@@ -57,6 +98,7 @@ static void registerPortTypes() {
   PORT( name, std::string );
   PORT( input, char );
   PORT( pos, std::shared_ptr<Position> );
+  PORT( vel, Position );
 }
 
 // TODO automate this, perhaps replacing F_ macro with template
@@ -67,6 +109,8 @@ static void registerActions() {
   ACT( chooseTgt );
   ACT( eatTgt );
   ACT( onInput, "pos", "input" );
+  ACT( plan, "vel" );
+  ACT( mv, "pos", "vel" );
 }
 
 auto imnotgay ()-> bool {
@@ -88,7 +132,8 @@ static void registerBlackboards() {
       { "time", 0 },
       { "name", std::string{"Michael"} },
       { "input", ' ' },
-      { "pos", std::shared_ptr<Position>() }
+      { "pos", std::shared_ptr<Position>() },
+      { "vel", Position{} }
      );
 }
 

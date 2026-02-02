@@ -1,5 +1,17 @@
+# Available keywords
+# ==================
+# seq:  A sequence of action nodes. It runs each element that's not finished and stops on the first one that fails.
+# fall: A sequence of action nodes. It runs each element that's not finished and stops on the first one that completes.
+# tree: A tree of actions grafted onto this one. Value should be the filename of another tree without directory path or suffix.
+# (no key): an action node.
+
+# Example
 seq:
 - sayHi
 - fall:
   - chooseTgt
   - eatTgt
+  - seq:
+    - jump
+    - eatSomeone
+    - tree: decideWhatToDoNext

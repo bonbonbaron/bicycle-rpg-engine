@@ -1,17 +1,34 @@
+# custom, nested quirks
 Trigger1:
   tree: test-tree
   priority: 5
-onStart:
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+Trigger2:
+  tree: test-tree
+  priority: 5
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+
+# Entity's entrypoint quirks
+onStart:  # optional
   tree: tt2
   priority: 7
-  freq: 500
-onSelect:
-  tree: test-tree
-  priority: 12
-Trigger3:
-  tree: test-tree
-  priority: 8
-  freq: 200
-onInput:
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+onInput:  # optional
   tree: onInput
   priority: 100
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+onTimer:  # optional
+  tree: onInput
+  priority: 100
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+onCollision: # optional
+  tree: onInput
+  priority: 100
+  freq: 1000 # (ms) optional
+  reps: 5# optional
+

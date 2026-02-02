@@ -1,0 +1,4 @@
+onStart:
+  tree: moveAround
+  priority: 7
+  freq: 1000
