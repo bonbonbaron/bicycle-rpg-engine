@@ -56,7 +56,7 @@ struct Agent {
   auto operator+=( const Agent& rhs ) -> Agent {
     Agent out;
     int multiplier{1};
-    if ( this->type == weaknesses[rhs.type] ) {
+    if ( this->type == weaknesses.at(rhs.type) ) {
       multiplier *= 2;
     }
     else if ( this->type == rhs.type || ( rhs.type == EffectType::HOLY ) ) {

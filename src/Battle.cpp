@@ -25,13 +25,15 @@ Battle::Battle() {
   }
 
   // Parse the map for good guys and bad guys to make selections easier.
-  _heroes = filter( []( CharPoint& c ) { return c.good; } );
-  _enemies = filter( []( CharPoint& c ) { return !c.good; } );
+  //_heroes = filter( []( CharPoint& c ) { return c.good; } );
+  //_enemies = filter( []( CharPoint& c ) { return !c.good; } );
 }
 
+#if 0
 void Battle::clean() {
   std::vector<std::string> keysToRemove{};
   // Remove dead characters from constellation
+  // auto points = getPoints();
   auto points = getPoints();
   // TODO might be cleaner to use filter() here.
   for ( auto it = points.begin(); it != points.end(); ++it ) {
@@ -52,13 +54,15 @@ void Battle::clean() {
     }
   }
 }
+#endif
 
 
 
 void Battle::simulateBadGuyChoices() {
   Dice dice{ 0, static_cast<int>(_heroes.size()) - 1 };
+#if 0
   for (auto& e : _enemies ) {
-    auto effect = std::make_shared<Effect>( 
+    auto effect = std::make_shared<Agent>( 
         "fight", 
         -e.second.stats.strength, 
         TargetAttribute::HP, 
@@ -73,27 +77,30 @@ void Battle::simulateBadGuyChoices() {
         //it.shared_from_this(),
         effect );  // Mark this character's chosen action.
   }
+#endif
 }
 
 void Battle::aggregateActions() {
   for ( const auto& p : getPoints() ) {
     if ( p.second.action != nullptr ) {
-      _actionSequence.emplace_back( *p.second.action );
+      //_actionSequence.emplace_back( *p.second.action );
     }
   }
 }
 
 void Battle::sortActions() {
-  std::sort( _actionSequence.begin(), _actionSequence.end() );
+  //std::sort( _actionSequence.begin(), _actionSequence.end() );
 }
 
 void Battle::executeActions() {
   int i = 0;
+#if 0
   for ( auto& a : _actionSequence ) {
     if ( a.src->stats.hp > 0 && a.dst->stats.hp > 0 ) {
       a.execute();
     }
   }
+#endif
 }
 
 // This funcdtion needs to be pointed at to repeat for an event.
@@ -111,6 +118,6 @@ void Battle::run() {
   aggregateActions();
   sortActions();
   executeActions();
-  clean();  
+  // clean();  
 }
 
