@@ -1,0 +1,15 @@
+#include <bicycle/Blackboard.h>
+#include "example-blackboards.h"
+
+using BbMap = std::map<std::string, Blackboard>;
+
+extern "C" {
+  auto getBlackboards() -> const BbMap* {
+    const static BbMap blackboards {
+      { "bb1", bb1 },
+      { "bb2", bb2 },
+      { "bb3", bb3 },
+    };
+    return &blackboards;
+  }  // getBlackboards() 
+}
