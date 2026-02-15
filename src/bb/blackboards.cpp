@@ -1,5 +1,5 @@
 #include <bicycle/Blackboard.h>
-#include "example-blackboards.h"
+#include "bb/example-blackboards.h"
 
 using BbMap = std::map<std::string, Blackboard>;
 using BbMapPtr = std::shared_ptr<BbMap>;

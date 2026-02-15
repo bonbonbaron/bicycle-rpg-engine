@@ -3,7 +3,7 @@ STD=-std=c++20
 
 BGREPO := $(shell git rev-parse --show-toplevel)
 
-BGSRCS := blackboards ports actions example-actions 
+BGSRCS := bb/blackboards ports act/actions act/example-actions 
 
 BGOBJS := $(BGSRCS:%=$(BGREPO)/build/%.o)
 BGTGT=$(BGREPO)/bin/o.so
