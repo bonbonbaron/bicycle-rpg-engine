@@ -1,0 +1,17 @@
+simple ideas to start out with:
+  monster chasing you in a labyrinth: minotaur
+    - you have to take the golden goblet and escape the labyrinth with it
+    - simple collision detection
+    - you win when you get out
+    - procedurally generated levels, complicated mazes test your memory
+    - button states let you move without continuous clicking
+    - minotaur must be smart enough to traverse the maze to find you himself
+    - procedurally generated would be ideal
+    - countdown upon entry to minotaur waking
+    - shortened countdown after taking goblet to minotaur waking
+    - minotaur faster every level
+    - maze more complex every level
+    - maneuvers, such as taking winding longer routes out, can aid you in getting way
+    - tip-toeing versus running; he can hear your footsteps
+    - he can also smell you
+

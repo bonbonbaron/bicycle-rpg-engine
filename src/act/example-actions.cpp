@@ -16,19 +16,10 @@ enum BodyType {
   NUM_BODY_TYPES
 };
 
-auto checkBgCollision( const std::shared_ptr<Position>& origin, const Position& delta, const Environment& env ) -> BodyType {
-  if ( origin == nullptr ) {
-    return NOTHING;
-  }
-  const auto dstPos = *origin + delta;
-  auto& dstTileType = (*env.bgm)[dstPos.y][dstPos.x].type;
-  if ( dstTileType >= NUM_BODY_TYPES ) {
-    dstTileType = NOTHING;
-  }
-  return static_cast<BodyType>(dstTileType);
-}
+/* 
+ * if i can map onCollision, onTimer, etc. in yaml, then it'd be nice to be able to inherit from and append toother trees. With the option to override either an individual key or a whole branch (collision/timer/input) of the parent tree.
+ */
 
-// TODO separate collision handling to a higher layer
 F( onInput ) {
   auto& pos = arg.get<std::shared_ptr<Position>>( "pos" );
   auto& input = arg.get<int>( "input" );
